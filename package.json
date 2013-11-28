@@ -1,0 +1,31 @@
+{
+  "name": "hproxy",
+  "version": "0.0.0",
+  "description": "Convenient HTTP proxy for cross-domail request, request forward and creating mock data.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/switer/http-proxy.git"
+  },
+  "keywords": [
+    "http",
+    "proxy",
+    "cross-domain",
+    "request",
+    "forward",
+    "mock"
+  ],
+  "author": "switer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/switer/http-proxy/issues"
+  },
+  "dependencies": {
+    "colors": "~0.6.2",
+    "http-proxy": "~0.10.3"
+  }
+}
