@@ -1,4 +1,4 @@
-http-proxy
+http-route-proxy
 ==========
 
-Convenient HTTP proxy  for  cross-domail request, request forward and creating mock data.
+Convenient HTTP proxy  for  cross-domain request, request forward and creating mock data.
