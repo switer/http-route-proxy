@@ -38,3 +38,7 @@ proxyServer.proxy([
     }
 ]);
 ```
+
+## License
+
+MIT
