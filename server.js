@@ -20,7 +20,11 @@ var server = {
     /**
      *   marked proxy host
      */
-    proxies: {},
+    proxies: {
+        // from: Object {hostname, name}
+        // to: Object {hostname, name}
+        // rules: Object {static, forward, rewrite}
+    },
     /**
      *   a server to proxies indexes
      */
@@ -36,8 +40,12 @@ var server = {
         // validate host string
         HOST: /^[0-9a-zA-Z\.]+\:?[0-9]*$/,
         ROUTE_FORWARD: /^([A-Z]+:)?\/.*$/,
-        ROUTE_STATIC: /^!GET:\/.*$/
+        // static request must be GET method
+        ROUTE_STATIC: /^!([A-Z]+:)?\/.*$/
         // ROUTE_REWRITE: /^\^.*/
+    },
+    str: {
+        ROUTE_METHOD_PREFIX: '([A-Z]+:)?'
     },
     /**
      *   @param hosts[
@@ -77,19 +85,25 @@ var server = {
         // create proxy server
         var server = httpProxy.createServer(function (req, res, proxy) {
 
-            var url = req.url;
+            var method = req.method,
+                url = method.toUpperCase() + ':' + req.url;
 
             var proxyKey = _this.serverProxiesIndexes[serverId],
                 proxyConfig = _this.proxies[proxyKey];
 
-            if (_this.staticMatched(url)) {
-
-                // forwar to static server
+            if (_this.staticMatched(url, proxyConfig.rules.static)) {
+                // forward to static server
                 proxy.proxyRequest(req, res, {
                     host: staticServerConfig.hostname,
                     port: staticServerConfig.port
                 });
-            } 
+            } else if (_this.forwardMatched(url, proxyConfig.rules.forward)) {
+                // forward to remote server
+                proxy.proxyRequest(req, res, {
+                    host: to.hostname,
+                    port: to.port
+                });
+            }
             else {
                 proxy.proxyRequest(req, res, {
                     host: to.hostname,
@@ -165,22 +179,86 @@ var server = {
      *   parse each route rule to url matched rule
      */
     parseRouteRule: function (routes) {
-        var _this = this;
-        _.each(routes, function (route) {
+        var _this = this,
+            forwards = [],
+            rewrites = [],
+            statices = [];
 
+        _.each(routes, function (route) {
+            if (_this.regexps.ROUTE_FORWARD.exec(route)) {
+                forwards.push(_this.forwardRouteRule2Regexp(route));
+            } else if (_this.regexps.ROUTE_STATIC.exec(route)) {
+                statices.push(_this.staticRouteRule2Regexp(route));
+            }
         });
+
+        return {
+            forward: forwards,
+            rewrite: rewrites,
+            static: statices
+        };
+    },
+    /**
+     *   url route rule to regexp
+     */
+    string2Regexp: function (rule) {
+        rule = rule.replace('/','\\/');
+        rule = '^' + rule + '.*$';
+        return new RegExp(rule);
+    },
+    staticRouteRule2Regexp: function (rule) {
+        var matches = this.regexps.ROUTE_STATIC.exec(rule);
+
+        rule = rule.replace(/^!/, '');
+
+        if (!matches[1]) {
+            rule = this.str.ROUTE_METHOD_PREFIX + rule;
+        }
+        return this.string2Regexp(rule);
+    },
+    forwardRouteRule2Regexp: function (rule) {
+        var matches = this.regexps.ROUTE_FORWARD.exec(rule);
+
+        if (!matches[1]) {
+            rule = this.str.ROUTE_METHOD_PREFIX + rule;
+        }
+        return this.string2Regexp(rule);
     },
     /**
      *   Match url in forward rule
      */
-    forwardMatched: function (url) {
+    forwardMatched: function (url, forwardRules) {
+        var isMatched = false;
+        _.each(forwardRules, function (rule) {
+            if (rule.exec(url)) {
+                isMatched = true;
+                return true;
+            }
+        });
 
+        return isMatched;
     },
     /**
      *   Match url in static rule
      */
-    staticMatched: function (url) {
-        return !!/^\/public/.exec(url) ? true : false;
+    staticMatched: function (url, staticRules) {
+        console.log(url, staticRules)
+        var isMatched = false;
+        _.each(staticRules, function (rule) {
+            console.log(url, rule)
+            if (rule.exec(url)) {
+                isMatched = true;
+                return true;
+            }
+        });
+
+        return isMatched;
+    },
+    /**
+     *   resolve request url to restfull method
+     */
+    resolveURL: function () {
+
     }
 
 }
