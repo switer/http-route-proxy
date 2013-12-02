@@ -130,6 +130,9 @@ var server = {
          *  must listen hostname, otherwise it will be fail when repeat listening 
          *  localhost in the some port
          */
+        }, {
+            // use client origin
+            changeOrigin: true
         }).listen(from.port, from.hostname);
 
         console.log('Listen from ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey + 
