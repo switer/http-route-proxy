@@ -107,9 +107,7 @@ var server = {
                 //     port: staticServerConfig.port
                 // });
 
-                console.log(method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue + 
-                        ' to '.green.grey  + directory + 
-                        requestURL);
+                console.log(method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue);
                 
             } else if (_this.forwardMatched(url, proxyConfig.rules.forward)) {
 
@@ -118,7 +116,7 @@ var server = {
                     host: to.hostname,
                     port: to.port
                 });
-                console.log(method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue + 
+                console.log('forward '.yellow.grey + method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue + 
                         ' to '.green.grey + to.hostname + ':' + to.port.toString().blue.grey +
                         requestURL);
             }
@@ -132,7 +130,7 @@ var server = {
          *  must listen hostname, otherwise it will be fail when repeat listening 
          *  localhost in the some port
          */
-        }).listen(from.port, from.hostname); 
+        }).listen(from.port, from.hostname);
 
         console.log('Listen from ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey + 
                     ' to ' + to.hostname.green.grey + ' : ' + to.port.toString().blue.grey);
