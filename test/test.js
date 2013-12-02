@@ -1,13 +1,19 @@
 var proxyServer = require('http-route-proxy');
 
+/**
+ *   proxy configs
+ */
 proxyServer.proxy([
-    // common
+    // common config
     {
+        // origin host + port
         from: 'localhost:9000',
-        to: 'dev7.ucweb.local:8183',
+        // forward host + port
+        to: '192.168.1.1:8088',
+        // necessary field
         route: ['/', '!/public', '!/test']
     },
-    // 80 port
+    // host with 80 port
     {
         from: 'localhost:9001',
         to: 'github.io',
