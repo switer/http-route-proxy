@@ -5,8 +5,9 @@ var http = require('http'),
 
 var staticServer = {
 
+    // server id with increasing
     serverId: 0,
-
+    // serverr config with serverId as key
     server: {},
 
     init: function (hostname, port, options) {
@@ -34,18 +35,23 @@ var staticServer = {
         // marked server instance id
         return serverId;
     },
+    /**
+     *   send static file or directory which is requested
+     */
     sendfile: function (req, res, directory) {
+        // error handler
         function error(err) {
             res.statusCode = err.status || 500;
             console.error(err.message);
             res.end(err.message);
         }
-
+        // directory redirect handler
         function redirect() {
             res.statusCode = 301;
             res.setHeader('Location', req.url + '/');
             res.end('Redirecting to ' + req.url + '/');
         }
+        // send
         return send(req, url.parse(req.url).pathname)
             .root(directory)
             .on('error', error)
