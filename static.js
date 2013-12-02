@@ -27,7 +27,7 @@ var staticServer = {
         var _this = this;
         http.createServer(function(req, res) {
             // resolve root directory to local path 
-            directory = path.resolve(__dirname, directory);
+            directory = path.resolve(process.cwd(), directory);
             // response file sending
             _this.sendfile(req, res, directory);
 
