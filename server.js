@@ -3,6 +3,7 @@
  */
 
 var httpProxy = require('http-proxy'), // base on nodejitsu proxy server
+    staticServer = require('./static'), // static server
     colors = require('colors'), // use to pretty console log
     _ = require('underscore'); // use each method.....
 
@@ -33,7 +34,10 @@ var server = {
      */
     regexps: {
         // validate host string
-        HOST: /^\s*[0-9a-zA-Z\.]+\:?[0-9]*\s*$/,
+        HOST: /^[0-9a-zA-Z\.]+\:?[0-9]*$/,
+        ROUTE_FORWARD: /^([A-Z]+:)?\/.*$/,
+        ROUTE_STATIC: /^!GET:\/.*$/
+        // ROUTE_REWRITE: /^\^.*/
     },
     /**
      *   @param hosts[
@@ -66,6 +70,11 @@ var server = {
 
             _this = this; // for hoisting context of `this`
 
+        // init static server
+        var staticServerId = staticServer.init(),
+            staticServerConfig = staticServer.server[staticServerId];
+
+        // create proxy server
         var server = httpProxy.createServer(function (req, res, proxy) {
 
             var url = req.url;
@@ -73,10 +82,20 @@ var server = {
             var proxyKey = _this.serverProxiesIndexes[serverId],
                 proxyConfig = _this.proxies[proxyKey];
 
-            proxy.proxyRequest(req, res, {
-                host: to.hostname,
-                port: to.port
-            });
+            if (_this.staticMatched(url)) {
+
+                // forwar to static server
+                proxy.proxyRequest(req, res, {
+                    host: staticServerConfig.hostname,
+                    port: staticServerConfig.port
+                });
+            } 
+            else {
+                proxy.proxyRequest(req, res, {
+                    host: to.hostname,
+                    port: to.port
+                });
+            }
         /**
          *  must listen hostname, otherwise it will be fail when repeat listening 
          *  localhost in the some port
@@ -130,7 +149,7 @@ var server = {
             from: this.parseHost(config.from),
             to: this.parseHost(config.to),
             rules: this.parseRouteRule(config.route)
-            
+
         };
 
         // serverid to proxies key indexes
@@ -150,7 +169,20 @@ var server = {
         _.each(routes, function (route) {
 
         });
+    },
+    /**
+     *   Match url in forward rule
+     */
+    forwardMatched: function (url) {
+
+    },
+    /**
+     *   Match url in static rule
+     */
+    staticMatched: function (url) {
+        return !!/^\/public/.exec(url) ? true : false;
     }
+
 }
 
 module.exports = server;

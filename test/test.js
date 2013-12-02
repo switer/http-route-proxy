@@ -5,6 +5,15 @@ proxyServer.proxy([
     // 'POST:*'
     // 'GET:/public'
     // '!POST:/public'
-    { from: '10.1.84.165:4836', to: '10.1.84.68:9394', route:['GET:/post','/','!/public'], rewrite:['/public', '/remote'] },
-    { from: 'localhost', to: '10.1.84.68:9394', /*context:[]*/ }
+    {
+        from: '10.1.84.165:4836',
+        to: 'dev7.ucweb.local:8183',
+        route: ['GET:/post', '/', '!/public'],
+        rewrite: ['/public', '/remote']
+    }
 ]);
+
+// proxyServer.cross({
+//     origin: ['10.1.84.165:4836', 'localhost:8088'],
+//     to: 'github.io'
+// });

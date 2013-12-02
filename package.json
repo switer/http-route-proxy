@@ -27,6 +27,7 @@
   "dependencies": {
     "colors": "~0.6.2",
     "http-proxy": "~0.10.3",
-    "underscore": "~1.5.2"
+    "underscore": "~1.5.2",
+    "send": "~0.1.4"
   }
 }
