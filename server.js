@@ -3,8 +3,9 @@
  */
 
 var httpProxy = require('http-proxy'), // base on nodejitsu proxy server
-    staticServer = require('./static'), // static server
+    staticServer = require('./tools/static'), // static server
     colors = require('colors'), // use to pretty console log
+    path = require('path'),
     _ = require('underscore'); // use each method.....
 
 var server = {
@@ -79,30 +80,47 @@ var server = {
             _this = this; // for hoisting context of `this`
 
         // init static server
-        var staticServerId = staticServer.init(),
-            staticServerConfig = staticServer.server[staticServerId];
+        // var staticServerId = staticServer.init(),
+        //     staticServerConfig = staticServer.server[staticServerId];
 
         // create proxy server
         var server = httpProxy.createServer(function (req, res, proxy) {
 
             var method = req.method,
+                requestURL = req.url,
                 url = method.toUpperCase() + ':' + req.url;
 
             var proxyKey = _this.serverProxiesIndexes[serverId],
                 proxyConfig = _this.proxies[proxyKey];
 
             if (_this.staticMatched(url, proxyConfig.rules.static)) {
+                
+
+                var directory = path.resolve(process.cwd(), '.');
+
+                // send static files without server
+                staticServer.sendfile(req, res, directory);
+
                 // forward to static server
-                proxy.proxyRequest(req, res, {
-                    host: staticServerConfig.hostname,
-                    port: staticServerConfig.port
-                });
+                // proxy.proxyRequest(req, res, {
+                //     host: staticServerConfig.hostname,
+                //     port: staticServerConfig.port
+                // });
+
+                console.log(method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue + 
+                        ' to '.green.grey  + directory + 
+                        requestURL);
+                
             } else if (_this.forwardMatched(url, proxyConfig.rules.forward)) {
+
                 // forward to remote server
                 proxy.proxyRequest(req, res, {
                     host: to.hostname,
                     port: to.port
                 });
+                console.log(method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue + 
+                        ' to '.green.grey + to.hostname + ':' + to.port.toString().blue.grey +
+                        requestURL);
             }
             else {
                 proxy.proxyRequest(req, res, {
@@ -116,8 +134,8 @@ var server = {
          */
         }).listen(from.port, from.hostname); 
 
-        console.log('Listen -> ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey + 
-                    ' forward ' + to.hostname.green.grey + ' : ' + to.port.toString().blue.grey);
+        console.log('Listen from ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey + 
+                    ' to ' + to.hostname.green.grey + ' : ' + to.port.toString().blue.grey);
 
         return this.serverId ++;
     },
@@ -242,10 +260,8 @@ var server = {
      *   Match url in static rule
      */
     staticMatched: function (url, staticRules) {
-        console.log(url, staticRules)
         var isMatched = false;
         _.each(staticRules, function (rule) {
-            console.log(url, rule)
             if (rule.exec(url)) {
                 isMatched = true;
                 return true;
