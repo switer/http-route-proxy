@@ -65,7 +65,6 @@ var server = {
             }
             var serverId = _this.create(hostObj.from, hostObj.to);
             _this.saveHost(hostConfig, serverId);
-            
 
         });
     },
