@@ -63,10 +63,9 @@ var server = {
                 from: _this.parseHost(hostConfig.from),
                 to: _this.parseHost(hostConfig.to)
             }
-
             var serverId = _this.create(hostObj.from, hostObj.to);
-
             _this.saveHost(hostConfig, serverId);
+            
 
         });
     },
@@ -133,8 +132,14 @@ var server = {
         }, {
             // use client origin
             changeOrigin: true
-        }).listen(from.port, from.hostname);
-
+        })
+          .listen(from.port, from.hostname)
+          .on('error', function (e) {
+            // catch server listen error
+            console.log('Create proxy error,'.red.grey + "cause by can't listen host from " + 
+                from.hostname.yellow.grey + ' : ' + from.port.toString().blue.grey);
+          });
+        
         console.log('Listen from ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey + 
                     ' to ' + to.hostname.green.grey + ' : ' + to.port.toString().blue.grey);
 

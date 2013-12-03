@@ -1,4 +1,4 @@
-var proxyServer = require('http-route-proxy');
+var proxyServer = require('../server');
 
 /**
  *   proxy configs
@@ -16,6 +16,12 @@ proxyServer.proxy([
     // host with 80 port
     {
         from: 'localhost:9001',
+        to: 'github.io',
+        route: ['/']
+    },
+    // host with 80 port
+    {
+        from: '10.1.80.91:9001',
         to: 'github.io',
         route: ['/']
     }
