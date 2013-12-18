@@ -1,6 +1,6 @@
 {
   "name": "http-route-proxy",
-  "version": "0.0.3-1",
+  "version": "0.0.4",
   "description": "Convenient HTTP proxy for cross-domail request, request forward and creating mock data.",
   "main": "server.js",
   "scripts": {
