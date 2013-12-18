@@ -82,7 +82,28 @@ var server = {
         //     staticServerConfig = staticServer.server[staticServerId];
 
         // create proxy server
-        var server = httpProxy.createServer(function (req, res, proxy) {
+        var server = httpProxy.createServer(
+            /**
+             *  middleware
+             *  Cross-Domain-Access
+             */
+            function (req, res, next) {
+
+                // if exist Origin, use "Cross-Domain-Access"
+                if (req.headers.origin) {
+
+                    res.setHeader('access-control-allow-origin', req.headers.origin);
+                    res.setHeader('access-control-allow-credentials', true);
+
+                    // avoid node-http-proxy to rewrite headers
+                    var setHeader = res.setHeader;
+                    res.setHeader = function (key, value) {
+                        setHeader.call(res, key, value);
+                    }
+                }
+                next();
+                
+            }, function (req, res, proxy) {
 
             var method = req.method,
                 requestURL = req.url,
