@@ -10,7 +10,7 @@ npm install http-route-proxy
 ```
 
 
-## Useing http-route-proxy
+## Using http-route-proxy
 
 __Example__:
 
