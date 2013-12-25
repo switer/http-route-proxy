@@ -7,22 +7,17 @@ proxyServer.proxy([
     // common config
     {
         // origin host + port
-        from: 'localhost:9000',
+        from: 'localhost:9002',
         // forward host + port
-        to: '192.168.1.1:8088',
+        to: 'www.12306.cn',
         // necessary field
         route: ['/', '!/public', '!/test']
     },
     // host with 80 port
     {
         from: 'localhost:9001',
-        to: 'github.io',
-        route: ['/']
-    },
-    // host with 80 port
-    {
-        from: '10.1.80.91:9001',
-        to: 'github.io',
+        to: 'github.com',
+        https: true,
         route: ['/']
     }
 ]);

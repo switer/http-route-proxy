@@ -1,5 +1,10 @@
 /**
- *   Proxy server module
+ *  chainjs
+ *  http://github.com/switer/http-route-proxy
+ *
+ *  Copyright (c) 2013 "switer" guankaishe
+ *  Licensed under the MIT license.
+ *  https://github.com/switer/http-route-proxy/blob/master/LICENSE
  */
 
 var httpProxy = require('http-proxy'), // base on nodejitsu proxy server
@@ -35,6 +40,10 @@ var server = {
      */
     defaultPort: 80,
     /**
+     *  defualt port for https
+     */
+    defualtHttpsPort: 443,
+    /**
      *   module regexps
      */
     regexps: {
@@ -57,13 +66,15 @@ var server = {
     proxy: function (hosts) {
         var _this = this;
 
+        // handle each proxy config
         _.each(hosts, function (hostConfig) {
 
             var hostObj = {
                 from: _this.parseHost(hostConfig.from),
-                to: _this.parseHost(hostConfig.to)
+                to: _this.parseHost(hostConfig.to, {https: hostConfig.https})
             }
-            var serverId = _this.create(hostObj.from, hostObj.to);
+
+            var serverId = _this.create(hostObj.from, hostObj.to, hostConfig);
             _this.saveHost(hostConfig, serverId);
 
         });
@@ -71,15 +82,31 @@ var server = {
     /**
      *   create a server for the one proxy config
      */
-    create: function (from, to) {
+    create: function (from, to, options) {
 
         var serverId = this.serverId, // for serverid hoisting
+
+            proxyOptions = {
+                // use client origin
+                changeOrigin: true
+            },
 
             _this = this; // for hoisting context of `this`
 
         // init static server
         // var staticServerId = staticServer.init(),
         //     staticServerConfig = staticServer.server[staticServerId];
+
+        if (options.https) {
+            // https options
+            proxyOptions = {
+                // if use https route proxy, changeOrigin is necessary
+                changeOrigin: true,
+                target: {
+                  https: true
+                }
+            };
+        }
 
         // create proxy server
         var server = httpProxy.createServer(
@@ -88,19 +115,31 @@ var server = {
              *  Cross-Domain-Access
              */
             function (req, res, next) {
+                
+                var reqHeaders = options.headers? options.headers.req:{},
+                    resHeaders = options.headers? options.headers.res:{};
 
                 // if exist Origin, use "Cross-Domain-Access"
                 if (req.headers.origin) {
-
                     res.setHeader('access-control-allow-origin', req.headers.origin);
                     res.setHeader('access-control-allow-credentials', true);
-
-                    // avoid node-http-proxy to rewrite headers
-                    var setHeader = res.setHeader;
-                    res.setHeader = function (key, value) {
-                        setHeader.call(res, key, value);
-                    }
                 }
+                // avoid node-http-proxy to rewrite headers
+                var setHeader = res.setHeader;
+                res.setHeader = function (key, value) {
+                    if (!resHeaders[key]) setHeader.call(res, key, value);
+                }
+
+                //rewrite header on config
+                if (options.headers) {
+                    _.each(options.headers.req, function (value, key) {
+                        req.headers[key] = value;
+                    });
+                    _.each(options.headers.res, function (value, key) {
+                        res.setHeader(key, value);
+                    });
+                }
+
                 next();
                 
             }, function (req, res, proxy) {
@@ -126,7 +165,7 @@ var server = {
                 //     port: staticServerConfig.port
                 // });
 
-                console.log(method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue);
+                console.log(method.blue.grey + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue.grey);
                 
             } else if (_this.forwardMatched(url, proxyConfig.rules.forward)) {
 
@@ -135,11 +174,12 @@ var server = {
                     host: to.hostname,
                     port: to.port
                 });
-                console.log('forward '.yellow.grey + method.blue + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue + 
-                        ' to '.green.grey + to.hostname + ':' + to.port.toString().blue.grey +
+                console.log('forward '.yellow.grey + method.blue.grey + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + 
+                        from.port.toString().blue.grey +' to '.green.grey + to.hostname + ':' + to.port.toString().blue.grey +
                         requestURL);
             }
             else {
+
                 proxy.proxyRequest(req, res, {
                     host: to.hostname,
                     port: to.port
@@ -149,10 +189,7 @@ var server = {
          *  must listen hostname, otherwise it will be fail when repeat listening 
          *  localhost in the some port
          */
-        }, {
-            // use client origin
-            changeOrigin: true
-        })
+        }, proxyOptions)
           .listen(from.port, from.hostname)
           .on('error', function (e) {
             // catch server listen error
@@ -166,38 +203,22 @@ var server = {
         return this.serverId ++;
     },
     /**
-     *   rerturn the hostname + port format array
-     */
-    // parseHosts: function (hosts) {
-    //     var parseResult = [],
-    //         _this = this;
-
-    //     _.each(hosts, function (item) {
-    //         parseResult.push({
-    //             from: _this.parseHost(item.from),
-    //             to: _this.parseHost(item.to),
-    //         });
-    //     });
-
-    //     return parseResult;
-    // },
-    /**
      *   host is a string, should be parse to hostname + port object format
      */
-    parseHost: function (host) {
+    parseHost: function (host, options) {
+        options = options || {};
         var hostname = host.split(':')[0],
             port = host.split(':')[1];
 
         return {
             hostname: hostname,
-            port: port ? parseInt(port) : this.defaultPort
+            port: port ? parseInt(port) : (options.https ? this.defualtHttpsPort : this.defaultPort)
         };
     },
     /**
      *   save each host config
      */
     saveHost: function (config, serverId) {
-
         // craete host proxy config key
         var proxyKey = [config.from, config.to].join('->');
 
@@ -205,7 +226,7 @@ var server = {
         this.proxies[proxyKey] = {
 
             from: this.parseHost(config.from),
-            to: this.parseHost(config.to),
+            to: this.parseHost(config.to, {https: config.https}),
             rules: this.parseRouteRule(config.route)
 
         };
