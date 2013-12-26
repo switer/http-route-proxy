@@ -39,6 +39,7 @@ proxyServer.proxy([
 ```
 
 ## Set Headers
+```javascript
 proxyServer.proxy([
     {
         from: 'localhost:9000',
@@ -51,8 +52,10 @@ proxyServer.proxy([
         route: ['/']
     },
 ]);
+```
 
 ## Using HTTPS
+```javascript
 proxyServer.proxy([
     {
         from: 'localhost:9000',
@@ -61,6 +64,7 @@ proxyServer.proxy([
         route: ['/']
     },
 ]);
+```
 
 ## License
 
