@@ -6,8 +6,7 @@ var proxyServer = require('../server');
 proxyServer.proxy([
     {
         from: 'localhost:9012',
-        to: 'www.12306.cn',
-        // to: 'unionpaysecure.com',
+        to: 'www.google.com',
         https: true,
         route: ['/']
     },
@@ -16,9 +15,16 @@ proxyServer.proxy([
         // origin host + port
         from: 'localhost:9002',
         // forward host + port
-        to: 'www.12306.cn',
+        to: 'localhost:9012',
+        // reset headers
+        headers: {
+            req: {
+                origin: 'www.google.com',
+                referer: 'www.google.com'
+            }
+        },
         // necessary field
-        route: ['/', '!/public', '!/test']
+        route: ['/']
     },
     // host with 80 port
     {

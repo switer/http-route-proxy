@@ -117,8 +117,9 @@ var server = {
              *  Cross-Domain-Access
              */
             function (req, res, next) {
-                var reqHeaders = options.headers? options.headers.req:{},
-                    resHeaders = options.headers? options.headers.res:{};
+
+                var reqHeaders = options.headers && options.headers.req ? options.headers.req: {},
+                    resHeaders = options.headers && options.headers.res ? options.headers.res: {};
 
                 // if exist Origin, use "Cross-Domain-Access"
                 if (req.headers.origin) {
@@ -133,10 +134,10 @@ var server = {
 
                 //rewrite header on config
                 if (options.headers) {
-                    _.each(options.headers.req, function (value, key) {
+                    _.each(reqHeaders, function (value, key) {
                         req.headers[key] = value;
                     });
-                    _.each(options.headers.res, function (value, key) {
+                    _.each(resHeaders, function (value, key) {
                         res.setHeader(key, value);
                     });
                 }
