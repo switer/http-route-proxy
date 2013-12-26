@@ -1,5 +1,5 @@
 /**
- *  chainjs
+ *  http-route-proxy
  *  http://github.com/switer/http-route-proxy
  *
  *  Copyright (c) 2013 "switer" guankaishe
@@ -103,11 +103,13 @@ var server = {
                 // if use https route proxy, changeOrigin is necessary
                 changeOrigin: true,
                 target: {
-                  https: true
+                  https: true,
+                  rejectUnauthorized: false
                 }
             };
+            // work to resolve the problem of proxing unsign https website catch error.
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
         }
-
         // create proxy server
         var server = httpProxy.createServer(
             /**
@@ -115,7 +117,6 @@ var server = {
              *  Cross-Domain-Access
              */
             function (req, res, next) {
-                
                 var reqHeaders = options.headers? options.headers.req:{},
                     resHeaders = options.headers? options.headers.res:{};
 
@@ -200,6 +201,14 @@ var server = {
         console.log('Listen from ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey + 
                     ' to ' + to.hostname.green.grey + ' : ' + to.port.toString().blue.grey);
 
+        // server.proxy.on('proxyError', function (err, req, res) {
+        //     res.writeHead(500, {
+        //         'Content-Type': 'text/plain'
+        //     });
+
+        //     res.end('Something went wrong. And we are reporting a custom error message.' + err); 
+        // });
+
         return this.serverId ++;
     },
     /**
@@ -271,6 +280,9 @@ var server = {
         rule = '^' + rule + '.*$';
         return new RegExp(rule);
     },
+    /**
+     *  find the rule whether is static route rule and return regexpess rule.
+     */
     staticRouteRule2Regexp: function (rule) {
         var matches = this.regexps.ROUTE_STATIC.exec(rule);
 
@@ -281,6 +293,9 @@ var server = {
         }
         return this.string2Regexp(rule);
     },
+    /**
+     *  find the rule whether is forward route rule and return regexpess rule.
+     */
     forwardRouteRule2Regexp: function (rule) {
         var matches = this.regexps.ROUTE_FORWARD.exec(rule);
 
@@ -316,12 +331,6 @@ var server = {
         });
 
         return isMatched;
-    },
-    /**
-     *   resolve request url to restfull method
-     */
-    resolveURL: function () {
-
     }
 
 }
