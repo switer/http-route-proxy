@@ -230,7 +230,10 @@ var server = {
      */
     saveHost: function (config, serverId) {
         // craete host proxy config key
-        var proxyKey = [config.from, config.to].join('->');
+        var proxyKey = [config.from, config.to].join('->'),
+            route = config.route || [];
+
+        if (!_.contains(route, '/')) route.push('/');
 
         // save proxy config
         this.proxies[proxyKey] = {

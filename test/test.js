@@ -7,8 +7,17 @@ proxyServer.proxy([
     {
         from: 'localhost:9012',
         to: 'www.google.com',
-        https: true,
-        route: ['/']
+        https: true
+    },
+    {
+        form: 'localhost:9003',
+        to: 'www.google.com',
+        route: [
+            'www.google.com/',
+            'weibo.com/post',
+            '!/public'
+        ]
+
     },
     // common config
     {
@@ -22,15 +31,12 @@ proxyServer.proxy([
                 origin: 'www.google.com',
                 referer: 'www.google.com'
             }
-        },
-        // necessary field
-        route: ['/']
+        }
     },
     // host with 80 port
     {
         from: 'localhost:9001',
         to: 'github.com',
-        https: true,
-        route: ['/']
+        https: true
     }
 ]);
