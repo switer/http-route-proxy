@@ -6,12 +6,11 @@ var proxyServer = require('../server');
 proxyServer.proxy([
     {
         from: 'localhost:9012',
-        to: 'www.google.com',
-        https: true
+        to: 'https://www.google.com'
     },
     {
-        form: 'localhost:9003',
-        to: 'www.google.com',
+        from: 'localhost:9003',
+        to: 'www.google.com', // default http
         route: [
             'www.google.com/',
             'weibo.com/post',

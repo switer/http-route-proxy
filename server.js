@@ -217,12 +217,19 @@ var server = {
      */
     parseHost: function (host, options) {
         options = options || {};
-        var hostname = host.split(':')[0],
-            port = host.split(':')[1];
 
+        var hostChunks = host.match(/^([a-z]+)\:\/\/(.*)$/),
+            protocal = hostChunks? hostChunks[1]: '',
+            hostSection = hostChunks? hostChunks[2]: host,
+            hostname = hostSection.split(':')[0],
+            port = hostSection.split(':')[1],
+            protocalObj = this.protocal(protocal),
+            protocalOptions = protocalObj.unknow ? options: protocalObj;
+            
         return {
+            protocal: this.options2protocal(protocalOptions),
             hostname: hostname,
-            port: port ? parseInt(port) : (options.https ? this.defualtHttpsPort : this.defaultPort)
+            port: port ? parseInt(port) : (protocalOptions.https ? this.defualtHttpsPort : this.defaultPort)
         };
     },
     /**
@@ -252,6 +259,40 @@ var server = {
      */
     validHost: function (host) {
         return this.regexps.HOST.exec(host) ? true : false;
+    },
+    /**
+     *  
+     *  @return Object
+     */
+    protocal: function (protocal) {
+        var protocalObj = {
+            http: false,
+            https: false,
+            websocket: false,
+            unknow: false
+        };
+        if (protocal === 'http') {
+            protocalObj.http = true;
+        } else if (protocal === 'https') {
+            protocalObj.https = true;
+        } else if (protocal === 'ws') {
+            protocalObj.websocket = true;
+        } else {
+            protocalObj.unknow = true;
+        }
+        return protocalObj;
+    },
+    options2protocal: function (options) {
+
+        if (options.https) {
+            return 'https';
+        } else if (options.websocket) {
+            return 'ws';
+        } else if (options.http) {
+            return 'http';
+        } else {
+            return 'http';
+        }
     },
     /**
      *   parse each route rule to url matched rule
