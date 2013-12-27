@@ -1,5 +1,9 @@
 ## ChangeLog for: http-route-proxy
 
+#### Version 0.0.6-2 - 2013/12/26
+
+- [Feature]: Support write protocal in hostname(https://xxxx.com) instead of using protocal(https: true) option.
+
 #### Version 0.0.6-1 - 2013/12/26
 
 - [Feature]: route field isn't necessary and it has defualt value of `['/']`

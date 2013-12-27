@@ -64,6 +64,13 @@ proxyServer.proxy([
         https: true
     }
 ]);
+// or
+proxyServer.proxy([
+    {
+        from: 'localhost:9000',
+        to: 'https://www.google.com'
+    }
+]);
 ```
 
 ### Change Log
