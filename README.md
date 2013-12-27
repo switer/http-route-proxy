@@ -3,19 +3,19 @@ http-route-proxy
 
 Convenient HTTP/HTTPS route proxy for cross-domain request, request forward.
 
-## Installing
+### Installing
 
 ```bash
 npm install http-route-proxy
 ```
 
-## Testing
+### Testing
 
 ```bash
 npm test
 ```
 
-## Using http-route-proxy
+### Using http-route-proxy
 
 #### Sample:
 
@@ -66,7 +66,7 @@ proxyServer.proxy([
 ]);
 ```
 
-## Change Log
+### Change Log
 
 #### Version 0.0.6-1 - 2013/12/26
 
@@ -89,7 +89,7 @@ proxyServer.proxy([
 - [Feature]: Support cross-domain request
 
 
-## License
+### License
 
 The MIT License (MIT)
 
