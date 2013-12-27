@@ -1,7 +1,7 @@
 http-route-proxy
 ==========
 
-Convenient HTTP proxy for cross-domain request, request forward.
+Convenient HTTP/HTTPS route proxy for cross-domain request, request forward.
 
 ## Installing
 
@@ -32,9 +32,11 @@ proxyServer.proxy([
         from: 'localhost:9000',
         // forward host + port
         to: '192.168.1.1:8088',
-        // necessary field, match forward action rule
+        // match forward action rule
+        // `"/"` means forward match all actions, 
+        // `!/public` means match local static forward match `/public.*`
         route: ['/', '!/public', '!/test']
-    },
+    }
 ]);
 ```
 
@@ -48,9 +50,8 @@ proxyServer.proxy([
         headers: {
             req: {origin: 'www.google.com', referer: 'www.google.com'},
             res: {'access-control-allow-origin': 'https://www.google.com', 'access-control-allow-credentials': true}
-        },
-        route: ['/']
-    },
+        }
+    }
 ]);
 ```
 
@@ -60,9 +61,8 @@ proxyServer.proxy([
     {
         from: 'localhost:9000',
         to: 'www.google.com',
-        https: true,
-        route: ['/']
-    },
+        https: true
+    }
 ]);
 ```
 
