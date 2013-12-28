@@ -91,7 +91,7 @@ proxyServer.proxy([
             },
             {
                 action: '/imper',
-                forward: 'https://switer.github.io/imper',
+                forward: 'https://switer.github.io',
                 headers: {
                     req: {origin: 'https://github.io'}
                 }
