@@ -4,23 +4,41 @@ var proxyServer = require('../server');
  *   proxy configs
  */
 proxyServer.proxy([
+    // {
+    //     from: 'localhost:9004',
+    //     to: 'https://www.google.com'
+    // },
     {
-        from: 'localhost:9012',
-        to: 'https://www.google.com'
+        from: 'localhost:9004',
+        to: 'https://www.12306.cn'
     },
     {
-        from: 'localhost:9001',
-        to: 'google.com'
-        route: [
-            '/', // forward config.to
-            '!/public', // forward local static files 
+        from: 'localhost:9003',
+        route: [{
+                action: '/',
+                forward: 'https://www.google.com'
+            },
+            '!/public', // forward to local static files
             {
                 action: '/otn',
-                forward: 'www.google.com'
+                forward: 'localhost:9004',
                 headers: {
-                    req: {Origin: 'www.google.com'}
-                },
-                https: true
+                    req: {
+                        origin: 'https://www.12306.cn/',
+                        referer: 'https://www.12306.cn/'
+                    }
+                }
+            }, {
+                action: '/otn/login/init',
+                forward: 'kyfw.12306.cn',
+                headers: {
+                    req: {
+                        Origin: 'kyfw.12306.cn'
+                    },
+                    res: {
+                        Doo: 'guankaishe'
+                    }
+                }
             }
         ]
     },
@@ -29,12 +47,17 @@ proxyServer.proxy([
         // origin host + port
         from: 'localhost:9002',
         // forward host + port
-        to: 'localhost:9012',
+        to: 'www.google.com',
+        // protocal option
+        https: true,
         // reset headers
         headers: {
             req: {
-                origin: 'www.google.com',
-                referer: 'www.google.com'
+                origin: 'https://www.google.com',
+                referer: 'https://www.google.com'
+            },
+            res: {
+                Doo: 'www.google.com'
             }
         }
     },
@@ -42,6 +65,12 @@ proxyServer.proxy([
     {
         from: 'localhost:9001',
         to: 'github.com',
-        https: true
+        https: true,
+        headers: {
+            req: {
+                origin: 'https://github.com',
+                referer: 'https://github.com'
+            }
+        }
     }
 ]);
