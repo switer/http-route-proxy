@@ -9,14 +9,20 @@ proxyServer.proxy([
         to: 'https://www.google.com'
     },
     {
-        from: 'localhost:9003',
-        to: 'www.google.com', // default http
+        from: 'localhost:9001',
+        to: 'google.com'
         route: [
-            'www.google.com/',
-            'weibo.com/post',
-            '!/public'
+            '/', // forward config.to
+            '!/public', // forward local static files 
+            {
+                action: '/otn',
+                forward: 'www.google.com'
+                headers: {
+                    req: {Origin: 'www.google.com'}
+                },
+                https: true
+            }
         ]
-
     },
     // common config
     {
