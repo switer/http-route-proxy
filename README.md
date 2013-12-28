@@ -35,7 +35,7 @@ proxyServer.proxy([
         // match forward action rule
         // `"/"` means forward match all actions, 
         // `!/public` means match local static forward match `/public.*`
-        route: ['/', '!/public', '!/test']
+        route: ['/', '!/public']
     }
 ]);
 ```
@@ -73,7 +73,40 @@ proxyServer.proxy([
 ]);
 ```
 
+#### Forward By Request Path
+Forward to various host on matching the path action
+
+```javascript
+proxyServer.proxy([
+    {
+        from: 'localhost:9000',
+        to: 'www.google.com',
+        route: {
+            {
+                action: '/switer',
+                forward: 'https://github.com',
+                headers: {
+                    req: {origin: 'https://github.com'}
+                }
+            },
+            {
+                action: '/imper',
+                forward: 'https://switer.github.io/imper',
+                headers: {
+                    req: {origin: 'https://github.io'}
+                }
+            },
+            '!/public'
+        }
+    }
+]);
+```
+
 ### Change Log
+
+#### Version 0.1.0 - 2013/12/28
+
+- [Feature]: Forward to various host on matching the path action.
 
 #### Version 0.0.6-1 - 2013/12/26
 

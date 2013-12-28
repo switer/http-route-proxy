@@ -1,5 +1,9 @@
 ## ChangeLog for: http-route-proxy
 
+#### Version 0.1.0 - 2013/12/28
+
+- [Feature]: Forward to various host on matching the path action.
+
 #### Version 0.0.6-2 - 2013/12/26
 
 - [Feature]: Support write protocal in hostname(https://xxxx.com) instead of using protocal(https: true) option.

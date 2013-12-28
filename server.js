@@ -174,7 +174,7 @@ var server = {
           });
         
         console.log('Listen from ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey);
-
+        // Custom error
         server.proxy.on('proxyError', function (err, req, res) {
             res.writeHead(500, {
                 'Content-Type': 'text/plain'
