@@ -225,7 +225,7 @@ var server = {
             port = hostSection.split(':')[1],
             protocalObj = this.protocal(protocal),
             protocalOptions = protocalObj.unknow ? options: protocalObj;
-            
+
         return {
             protocal: this.options2protocal(protocalOptions),
             hostname: hostname,
@@ -282,6 +282,9 @@ var server = {
         }
         return protocalObj;
     },
+    /**
+     *  protocal option to protocal name
+     */
     options2protocal: function (options) {
 
         if (options.https) {
