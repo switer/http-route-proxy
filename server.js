@@ -159,7 +159,7 @@ var server = {
             }
             else {
 
-                console.log('Sorry proxy error, the proxy cause that error, please check your'.red); 
+                console.log("Sorry proxy error, http-route-proxy can't match any forward rule, please check your proxy config".red); 
             }
         /**
          *  must listen hostname, otherwise it will be fail when repeat listening 
