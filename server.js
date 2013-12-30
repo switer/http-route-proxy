@@ -76,6 +76,7 @@ var server = {
             _this.saveHost(hostObj.from, hostObj.routes, serverId);
 
         });
+
     },
     /**
      *   create a server for the one proxy config
@@ -418,7 +419,7 @@ var server = {
      */
     staticMatched: function (url, staticRules) {
         var isMatched = false;
-        
+
         _.each(staticRules, function (rule) {
             if (rule.exec(url)) {
                 isMatched = true;
