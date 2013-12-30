@@ -1,5 +1,9 @@
 ## ChangeLog for: http-route-proxy
 
+#### Version 0.1.1 - 2013/12/30
+
+- [Feature]: Support using as express connect middleware
+
 #### Version 0.1.0 - 2013/12/28
 
 - [Feature]: Forward to various host on matching the path action.

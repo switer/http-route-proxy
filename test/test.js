@@ -10,7 +10,7 @@ proxyServer.proxy([
     // },
     {
         from: 'localhost:9004',
-        to: 'https://www.12306.cn'
+        to: 'https://kyfw.12306.cn'
     },
     {
         from: 'localhost:9003',
@@ -24,8 +24,8 @@ proxyServer.proxy([
                 forward: 'localhost:9004',
                 headers: {
                     req: {
-                        origin: 'https://www.12306.cn/',
-                        referer: 'https://www.12306.cn/'
+                        origin: 'https://kyfw.12306.cn/',
+                        referer: 'https://kyfw.12306.cn/'
                     }
                 }
             }, {

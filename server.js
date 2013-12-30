@@ -17,6 +17,15 @@ var httpProxy = require('http-proxy'), // base on nodejitsu proxy server
 var server = {
 
     /**
+     *  request proxy route match status code
+     */
+    status: {
+
+        STATIC: 0,
+        FORWARD: 1,
+        UNMATCHED: 2
+    },
+    /**
      *   id for each proxy server
      */
     serverId: 1,
@@ -62,21 +71,44 @@ var server = {
      *  Proxy enter api
      */
     proxy: function (hosts) {
-        var _this = this;
 
         // handle each proxy config
         _.each(hosts, function (hostConfig) {
 
             var hostObj = {
-                from: _this.parseHost(hostConfig.from),
-                routes: _this.parseRouteRule(hostConfig)
+                from: this.parseHost(hostConfig.from),
+                routes: this.parseRouteRule(hostConfig)
             }
 
-            var serverId = _this.create(hostObj.from, hostObj.routes, hostConfig);
-            _this.saveHost(hostObj.from, hostObj.routes, serverId);
+            var serverId = this.create(hostObj.from, hostObj.routes, hostConfig);
+            this.saveHost(hostObj.from, hostObj.routes, serverId);
 
-        });
+        }.bind(this));
+    },
+    /**
+     *  support as express connect middleware
+     */
+    connect: function (config) {
 
+        var proxy = new httpProxy.RoutingProxy(),
+            connectConfig = {
+                rules: this.parseRouteRule(config)
+            },
+            _this = this;
+
+        return function (req, res, next) {
+
+            _this.proxyMiddleware(req, res, proxy, connectConfig, function (proxyStatus) {
+                // processing in express
+                if (proxyStatus.status !== _this.status.FORWARD) {
+                    next();
+                }
+                // forward request
+                else {
+                    console.log(proxyStatus.message);
+                }
+            });
+        }
     },
     /**
      *   create a server for the one proxy config
@@ -108,78 +140,96 @@ var server = {
             }, 
             function (req, res, proxy) {
 
-            var method = req.method,
-                requestURL = req.url,
-                url = method.toUpperCase() + ':' + req.url,
-                forwardRouteObj = null;
-
-            // get proxy config by proxy server id
-            var proxyConfig = _this.proxies[serverId];
-
-            if (_this.staticMatched(url, proxyConfig.rules.static)) {
-                // match route is static file response
-                var directory = path.resolve(process.cwd(), '.');
-
-                // send static files without server
-                staticServer.sendfile(req, res, directory);
-
-                console.log(method.blue.grey + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue.grey);
+                _this.proxyMiddleware(req, res, proxy, _this.proxies[serverId], function (statusObj) {
+                    console.log(statusObj.message);
+                });
                 
-            } else if (forwardRouteObj = _this.forwardMatched(url, proxyConfig.rules.forward)) {
-                // set headers of config
-                _this.setHeaders(req, res, forwardRouteObj.options.headers);
-
-                var forwardObj = forwardRouteObj.forward,
-                    // forward options
-                    proxyForwardOptions = {
-                        changeOrigin: true,
-                        host: forwardObj.hostname,
-                        port: forwardObj.port
-                    };
-
-                if (forwardRouteObj.options.https) {
-                    // set https forward options
-                    proxyForwardOptions = _.extend(proxyForwardOptions, {
-                        target: {
-                            https: true,
-                            rejectUnauthorized: false
-                        }
-                    });
-                }
-
-                // forward to remote server
-                proxy.proxyRequest(req, res, proxyForwardOptions);
-
-                console.log('forward '.yellow.grey + method.blue.grey + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + 
-                        from.port.toString().blue.grey +' to '.green.grey + forwardObj.protocal + '://' + forwardObj.hostname + ':' + forwardObj.port.toString().blue.grey +
-                        requestURL);
-            }
-            else {
-                console.log("Sorry proxy error, http-route-proxy can't match any forward rule, please check your proxy config".red); 
-            }
-        /**
-         *  must listen hostname, otherwise it will be fail when repeat listening 
-         *  localhost in the some port
-         */
-        })
-          .listen(from.port, from.hostname)
-          .on('error', function (e) {
-            // catch server listen error
-            console.log('Create proxy error,'.red.grey + "cause by can't listen host from " + 
-                from.hostname.yellow.grey + ' : ' + from.port.toString().blue.grey);
-          });
+            /**
+             *  must listen hostname, otherwise it will be fail when repeat listening 
+             *  localhost in the some port
+             */
+            }).listen(from.port, from.hostname)
+              .on('error', function (e) {
+                // catch server listen error
+                console.log('Create proxy error,'.red.grey + "cause by can't listen host from " + 
+                    from.hostname.yellow.grey + ' : ' + from.port.toString().blue.grey);
+              });
         
         console.log('Listen from ' + from.hostname.green.grey + ' : ' + from.port.toString().blue.grey);
+
         // Custom error
         server.proxy.on('proxyError', function (err, req, res) {
             res.writeHead(500, {
                 'Content-Type': 'text/plain'
             });
-
             res.end('Something went wrong. And we are reporting a custom error message.\n' + err); 
         });
 
         return this.serverId ++;
+    },
+    /**
+     *  Proxy middle for handling request and response
+     */
+    proxyMiddleware: function (req, res, proxy, config, next) {
+        var from = this.parseHost(req.headers.host),
+            method = req.method,
+            requestURL = req.url,
+            url = method.toUpperCase() + ':' + req.url,
+            forwardRouteObj = null;
+
+        // get proxy config by proxy server id
+        var proxyConfig = config;
+
+        if (this.staticMatched(url, proxyConfig.rules.static)) {
+            // match route is static file response
+            var directory = path.resolve(process.cwd(), '.');
+
+            // send static files without server
+            staticServer.sendfile(req, res, directory);
+
+            next({
+                status: this.status.STATIC,
+                message: method.blue.grey + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + from.port.toString().blue.grey
+            });
+            
+        } else if (forwardRouteObj = this.forwardMatched(url, proxyConfig.rules.forward)) {
+            // set headers of config
+            this.setHeaders(req, res, forwardRouteObj.options.headers);
+
+            var forwardObj = forwardRouteObj.forward,
+                // forward options
+                proxyForwardOptions = {
+                    changeOrigin: true,
+                    host: forwardObj.hostname,
+                    port: forwardObj.port
+                };
+
+            if (forwardRouteObj.options.https) {
+                // set https forward options
+                proxyForwardOptions = _.extend(proxyForwardOptions, {
+                    target: {
+                        https: true,
+                        rejectUnauthorized: false
+                    }
+                });
+            }
+
+            // forward to remote server
+            proxy.proxyRequest(req, res, proxyForwardOptions);
+
+            next({
+                status: this.status.FORWARD,
+                message: 'forward '.yellow.grey + method.blue.grey + '  ' + requestURL + ' from '.green.grey +  from.hostname + ':' + 
+                    from.port.toString().blue.grey +' to '.green.grey + forwardObj.protocal + '://' + forwardObj.hostname + ':' + 
+                    forwardObj.port.toString().blue.grey + requestURL
+            });
+        }
+        else {
+            next({
+                status: this.status.UNMATCHED,
+                message: "Sorry proxy error, http-route-proxy can't match any forward rule, please check your proxy config".red
+            });
+        }
     },
     /**
      *  Set headers by proxy config
