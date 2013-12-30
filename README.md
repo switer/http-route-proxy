@@ -103,6 +103,7 @@ proxyServer.proxy([
 ```
 
 #### Using as express connect middleware
+__express app.js config:__
 Push it on the first of connect
 
 ```javascript
