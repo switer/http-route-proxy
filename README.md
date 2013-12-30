@@ -102,7 +102,28 @@ proxyServer.proxy([
 ]);
 ```
 
+#### Using as express connect middleware
+Push it on the first of connect
+
+```javascript
+app.use(proxyServer.connect({
+  to: 'www.google.com',
+  https: true,
+  route: ['/']
+}));
+app.use(express.favicon());
+app.use(express.logger('dev'));
+app.use(express.bodyParser());
+app.use(express.methodOverride());
+app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
+```
+
 ### Change Log
+
+#### Version 0.1.1 - 2013/12/30
+
+- [Feature]: Support using as express connect middleware
 
 #### Version 0.1.0 - 2013/12/28
 
