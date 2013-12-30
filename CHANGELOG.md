@@ -28,6 +28,6 @@
 
 - [Feature]: Support https route proxy
 
-#### Version 0.0.8 - 2013/12/18
+#### Version 0.0.4 - 2013/12/18
 
 - [Feature]: Support cross-domain request
