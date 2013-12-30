@@ -25,17 +25,14 @@ var server = {
      */
     rules: {},
     /**
-     *   marked proxy host
+     *   save proxy host
      */
     proxies: {
-        // from: Object {hostname, name}
-        // to: Object {hostname, name}
-        // rules: Object {static, forward, rewrite}
+        /**
+         *  from: Object {hostname, name}
+         *  rules: Object {static, forward, rewrite}
+         */
     },
-    /**
-     *   a server to proxies indexes
-     */
-    serverProxiesIndexes: {},
     /**
      *   defualt port when config port is not pass in
      */
@@ -55,14 +52,14 @@ var server = {
         ROUTE_STATIC: /^!([A-Z]+:)?\/.*$/
         // ROUTE_REWRITE: /^\^.*/
     },
+    /**
+     *  for creating request route matching rule
+     */
     str: {
         ROUTE_METHOD_PREFIX: '([A-Z]+:)?'
     },
     /**
-     *   @param hosts[
-     *                  {from: "0.0.0.0:8088", to: "github.com"},
-     *                  {from: "baidu.com:8000", to: "github.com"}
-     *               ]
+     *  Proxy enter api
      */
     proxy: function (hosts) {
         var _this = this;
@@ -115,9 +112,8 @@ var server = {
                 url = method.toUpperCase() + ':' + req.url,
                 forwardRouteObj = null;
 
-            // var proxyKey = _this.serverProxiesIndexes[serverId],
+            // get proxy config by proxy server id
             var proxyConfig = _this.proxies[serverId];
-
 
             if (_this.staticMatched(url, proxyConfig.rules.static)) {
                 // match route is static file response
@@ -158,7 +154,6 @@ var server = {
                         requestURL);
             }
             else {
-
                 console.log("Sorry proxy error, http-route-proxy can't match any forward rule, please check your proxy config".red); 
             }
         /**
@@ -317,16 +312,18 @@ var server = {
         options = util.copy(options);
 
         var routes = options.route || [];
+        // if route config is empty, give it default
         routes = this.checkDefaultAction(routes);
 
         var _this = this,
-            forwards = [],
-            rewrites = [],
-            statices = [],
+            forwards = [], // forward route rules
+            // rewrites = [], // currently it's useless
+            statices = [], // static route rules
             forwardObj = null;
 
         _.each(routes, function (route) {
 
+            // route detail config 
             if (_.isObject(route)) {
 
                 var routeOptions = route,
@@ -341,24 +338,29 @@ var server = {
                 });
 
             }
+            // forward route match, route rule in shorthand
             else if (_this.regexps.ROUTE_FORWARD.exec(route)) {
-
+                // parse forward host
                 var forwardObj = _this.parseHost(options.to, options);
+                // set foward options
                 options = _.extend(options, forwardObj.protocalOption);
+                // save config
                 forwards.push({
                     rule: _this.forwardRouteRule2Regexp(route),
                     forward: forwardObj,
                     options: options
                 });
 
-            } else if (_this.regexps.ROUTE_STATIC.exec(route)) {
+            }
+            // static route match, route rule in shorthand
+            else if (_this.regexps.ROUTE_STATIC.exec(route)) {
                 statices.push(_this.staticRouteRule2Regexp(route));
             }
         });
 
         return {
             forward: forwards,
-            rewrite: rewrites,
+            // rewrite: rewrites,
             static: statices
         };
     },
@@ -395,12 +397,13 @@ var server = {
         return this.string2Regexp(rule);
     },
     /**
-     *   Match url in forward rule
+     *  Match url by forward route rule
+     *  @return {Object} routeRule
      */
     forwardMatched: function (url, forwardRules) {
         var matchedRoute = null;
-        _.each(forwardRules, function (ruleObj) {
 
+        _.each(forwardRules, function (ruleObj) {
             if (ruleObj.rule.exec(url)) {
                 matchedRoute = ruleObj;
                 return true;
@@ -410,10 +413,12 @@ var server = {
         return matchedRoute;
     },
     /**
-     *   Match url in static rule
+     *  Match url by static route rule
+     *  @return <Boolean> isMatched
      */
     staticMatched: function (url, staticRules) {
         var isMatched = false;
+        
         _.each(staticRules, function (rule) {
             if (rule.exec(url)) {
                 isMatched = true;
@@ -423,7 +428,6 @@ var server = {
 
         return isMatched;
     }
-
 }
 
 module.exports = server;
