@@ -1,7 +1,7 @@
 http-route-proxy
 ==========
 
-Convenient HTTP/HTTPS route proxy for cross-domain request, request forward.
+Convenient HTTP/HTTPS route proxy for cross-domain request, request forward.Support using as express connect middleware.
 
 ### Installing
 

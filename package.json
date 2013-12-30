@@ -1,7 +1,7 @@
 {
   "name": "http-route-proxy",
   "version": "0.1.1",
-  "description": "Convenient HTTP proxy for cross-domail request, request forward and creating mock data.",
+  "description": "Convenient HTTP proxy for cross-domail request, request forward.",
   "main": "server.js",
   "scripts": {
     "test": "node test/test.js",
@@ -13,11 +13,13 @@
   },
   "keywords": [
     "http",
+    "https",
     "proxy",
     "cross-domain",
     "request",
     "forward",
-    "mock"
+    "express",
+    "connect"
   ],
   "author": "switer",
   "license": "MIT",
