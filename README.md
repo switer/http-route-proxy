@@ -81,7 +81,7 @@ proxyServer.proxy([
     {
         from: 'localhost:9000',
         to: 'www.google.com',
-        route: {
+        route: [
             {
                 action: '/switer',
                 forward: 'https://github.com',
@@ -97,7 +97,7 @@ proxyServer.proxy([
                 }
             },
             '!/public'
-        }
+        ]
     }
 ]);
 ```
