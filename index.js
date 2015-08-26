@@ -173,7 +173,8 @@ var server = {
     proxyMiddleware: function (req, res, proxy, config, next) {
         var from = this.parseHost(req.headers.host),
             method = req.method,
-            requestURL = req.originalUrl,
+            // rewrite url to originUrl for proxy agent
+            requestURL = req.url = req.originalUrl,
             url = method.toUpperCase() + ':' + req.originalUrl,
             forwardRouteObj = null;
 
