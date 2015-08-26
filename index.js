@@ -8,8 +8,8 @@
  */
 
 var httpProxy = require('http-proxy'), // base on nodejitsu proxy server
-    staticServer = require('./tools/static'), // static server
-    util = require('./tools/util'),
+    staticServer = require('./lib/static'), // static server
+    util = require('./lib/util'),
     colors = require('colors'), // use to pretty console log
     path = require('path'),
     _ = require('underscore'); // use each method.....
@@ -173,8 +173,8 @@ var server = {
     proxyMiddleware: function (req, res, proxy, config, next) {
         var from = this.parseHost(req.headers.host),
             method = req.method,
-            requestURL = req.url,
-            url = method.toUpperCase() + ':' + req.url,
+            requestURL = req.originalUrl,
+            url = method.toUpperCase() + ':' + req.originalUrl,
             forwardRouteObj = null;
 
         // get proxy config by proxy server id

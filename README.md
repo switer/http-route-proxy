@@ -122,6 +122,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 ### Change Log
 
+#### Version 0.2.0 - 2015/08/26
+- [Bug]: Fixed bug when using as express middleware sometimes base-url will be stripped off. 
+
 #### Version 0.1.1 - 2013/12/30
 
 - [Feature]: Support using as express connect middleware

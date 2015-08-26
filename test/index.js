@@ -1,4 +1,4 @@
-var proxyServer = require('../server');
+var proxyServer = require('../index');
 
 /**
  *   proxy configs
