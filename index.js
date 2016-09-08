@@ -12,6 +12,7 @@ var httpProxy = require('http-proxy'), // base on nodejitsu proxy server
     util = require('./lib/util'),
     colors = require('colors'), // use to pretty console log
     path = require('path'),
+    Url = require('url'),
     _ = require('underscore'); // use each method.....
 
 var server = {
@@ -171,11 +172,12 @@ var server = {
      *  Proxy middle for handling request and response
      */
     proxyMiddleware: function (req, res, proxy, config, next) {
+
         var from = this.parseHost(req.headers.host),
             method = req.method,
             // rewrite url to originUrl for proxy agent
-            requestURL = req.url = req.originalUrl,
-            url = method.toUpperCase() + ':' + req.originalUrl,
+            requestURL = req.url = req.url || req.originalUrl,
+            url = method.toUpperCase() + ':' + requestURL,
             forwardRouteObj = null;
 
         // get proxy config by proxy server id
@@ -455,7 +457,7 @@ var server = {
     forwardMatched: function (url, forwardRules) {
         var matchedRoute = null;
 
-        _.each(forwardRules, function (ruleObj) {
+        forwardRules.some(function (ruleObj) {
             if (ruleObj.rule.exec(url)) {
                 matchedRoute = ruleObj;
                 return true;
